@@ -39,7 +39,7 @@ void MyCircle2f(GLfloat centerx, GLfloat centery, GLfloat radius){
   glEnd();
 }
 
-GLfloat RadiusOfBall = 15.;
+GLfloat RadiusOfBall = 3.;
 // Draw the ball, centered at the origin
 void draw_ball() {
   glColor3f(0.6,0.3,0.);
@@ -49,79 +49,47 @@ void draw_ball() {
 
 void Display(void)
 {
-  // swap the buffers
-  glutSwapBuffers(); 
+    // Swap the buffers
+    glutSwapBuffers();
 
-  //clear all pixels with the specified clear color
-  glClear(GL_COLOR_BUFFER_BIT);
-  // 160 is max X value in our world
-	// Define X position of the ball to be at center of window
-	xpos = 80.;
- 	
-	// Shape has hit the ground! Stop moving and start squashing down and then back up 
-	if (ypos == RadiusOfBall && ydir == -1  ) { 
-		sy = sy*squash ; 
-		
-		if (sy < 0.8)
-			// reached maximum suqash, now unsquash back up 
-			squash = 1.1;
-		else if (sy > 1.) {
-			// reset squash parameters and bounce ball back upwards
-			sy = 1.;
-			squash = 0.9;
-			ydir = 1;
-		}
-		sx = 1./sy;
-	} 
-	// 120 is max Y value in our world
-	// set Y position to increment 1.5 times the direction of the bounce
-	else {
-	ypos = ypos+ydir *1.5 - (1.-sy)*RadiusOfBall;
-	// If ball touches the top, change direction of ball downwards
-  	if (ypos == 120-RadiusOfBall)
-    	ydir = -1;
-	// If ball touches the bottom, change direction of ball upwards
-  	else if (ypos <RadiusOfBall)
-		ydir = 1;
-	}
-  
-/*  //reset transformation state 
-  glLoadIdentity();
-  
-  // apply translation
-  glTranslatef(xpos,ypos, 0.);
+    // Clear all pixels with the specified clear color
+    glClear(GL_COLOR_BUFFER_BIT);
 
-  // Translate ball back to center
-  glTranslatef(0.,-RadiusOfBall, 0.);
-  // Scale the ball about its bottom
-  glScalef(sx,sy, 1.);
-  // Translate ball up so bottom is at the origin
-  glTranslatef(0.,RadiusOfBall, 0.);
-  // draw the ball
-  draw_ball();
-*/
- 
-  //Translate the bouncing ball to its new position
-  T[12]= xpos;
-  T[13] = ypos;
-  glLoadMatrixf(T);
+    xpos += xdir * 1.02;
+    ypos += ydir * 1.02;
 
-  T1[13] = -RadiusOfBall;
-  // Translate ball back to center
-  glMultMatrixf(T1);
-  S[0] = sx;
-  S[5] = sy;
-  // Scale the ball about its bottom
-  glMultMatrixf(S);
-  T1[13] = RadiusOfBall;
-  // Translate ball up so bottom is at the origin
-  glMultMatrixf(T1);
-  
-  draw_ball();
-  glutPostRedisplay(); 
+    if (ypos >= 120.0 - RadiusOfBall || ypos <= RadiusOfBall)
+    {
+        ydir = -ydir;
+    }
 
-  
+    if (xpos >= 160.0 - RadiusOfBall || xpos <= RadiusOfBall)
+    {
+        xdir = -xdir;
+    }
 
+    T[12] = xpos;
+    T[13] = ypos;
+    glLoadMatrixf(T);
+
+    // Translate ball back to center
+    T1[13] = -RadiusOfBall;
+    glMultMatrixf(T1);
+
+    // Scale the ball about its bottom
+    S[0] = sx;
+    S[5] = sy;
+    glMultMatrixf(S);
+
+    // Translate ball up so bottom is at the origin
+    T1[13] = RadiusOfBall;
+    glMultMatrixf(T1);
+
+    // Draw the ball
+    draw_ball();
+
+    // Post redisplay to keep animating
+    glutPostRedisplay();
 }
 
 
@@ -144,7 +112,7 @@ void init(void){
   //set the clear color to be white
   glClearColor(0.0,0.8,0.0,1.0);
   // initial position set to 0,0
-  xpos = 60; ypos = RadiusOfBall; xdir = 1; ydir = 1;
+  xpos = 80.; ypos = RadiusOfBall; xdir = 1; ydir = 1;
   sx = 1.; sy = 1.; squash = 0.9;
   rot = 0; 
 
