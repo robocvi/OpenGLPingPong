@@ -1,0 +1,5 @@
+.vscode
+app*
+dependencies
+glad.c
+.DS_Store
