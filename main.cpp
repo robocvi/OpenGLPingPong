@@ -1,10 +1,9 @@
 //Punto extra: Ping Pong
-
 #include <GLUT/glut.h>
 #include <math.h>
 
 const double paddleWidth = 5.0;
-const double paddleHeight = 35.0;
+const double paddleHeight = 30.0;
 double xpos, ypos, ydir, xdir;
 double sx, sy, squash;
 int SPEED = 50;
@@ -50,8 +49,13 @@ void Display(void) {
     glutSwapBuffers();
     glClear(GL_COLOR_BUFFER_BIT);
 
-    xpos += xdir * 1.02;
-    ypos += ydir * 1.02;
+    xpos += xdir * 1.009;
+    ypos += ydir * 1.009;
+
+    if ((xpos - RadiusOfBall <= 25.0 && xpos - RadiusOfBall >= 20.0 && fabs(ypos - paddleYLeft) <= paddleHeight / 2) ||
+        (xpos + RadiusOfBall >= 135.0 && xpos + RadiusOfBall <= 140.0 && fabs(ypos - paddleYRight) <= paddleHeight / 2)) {
+        xdir = -xdir; 
+    }
 
     if (ypos >= 120.0 - RadiusOfBall || ypos <= RadiusOfBall)
     {
@@ -60,6 +64,8 @@ void Display(void) {
 
     if (xpos >= 160.0 - RadiusOfBall || xpos <= RadiusOfBall)
     {
+        xpos = 80.;
+        ypos = 60.;
         xdir = -xdir;
     }
 
