@@ -1,4 +1,4 @@
-//Example2_4.cpp : A bouncing ball 
+//Punto extra: Ping Pong
 
 //#include <windows.h> //the windows include file, required by all windows applications
 #include <GLUT/glut.h> //the glut file for windows operations
@@ -7,6 +7,8 @@
 
 #define PI 3.1415926535898 
 
+const double paddleWidth = 5.0;
+const double paddleHeight = 20.0;
 double xpos, ypos, ydir, xdir;         // x and y position for house to be drawn
 double sx, sy, squash;          // xy scale factors
 double rot, rdir;             // rotation 
@@ -40,12 +42,23 @@ void MyCircle2f(GLfloat centerx, GLfloat centery, GLfloat radius){
 }
 
 GLfloat RadiusOfBall = 3.;
-// Draw the ball, centered at the origin
 void draw_ball() {
   glColor3f(0.6,0.3,0.);
   MyCircle2f(0.,0.,RadiusOfBall);
   
 }
+
+void draw_paddle(double x, double y) {
+    glColor3f(1.0, 1.0, 1.0);
+    glBegin(GL_POLYGON);
+    glVertex2f(x - paddleWidth / 2, y - paddleHeight / 2);
+    glVertex2f(x + paddleWidth / 2, y - paddleHeight / 2);
+    glVertex2f(x + paddleWidth / 2, y + paddleHeight / 2);
+    glVertex2f(x - paddleWidth / 2, y + paddleHeight / 2);
+    glEnd();
+}
+
+double paddleY = 60.0;
 
 void Display(void)
 {
@@ -68,39 +81,31 @@ void Display(void)
         xdir = -xdir;
     }
 
-    T[12] = xpos;
-    T[13] = ypos;
-    glLoadMatrixf(T);
+    glLoadIdentity();
 
-    // Translate ball back to center
-    T1[13] = -RadiusOfBall;
-    glMultMatrixf(T1);
+    glPushMatrix();
+    glTranslatef(xpos, ypos, 0.);
+    glTranslatef(0., -RadiusOfBall, 0.);
+    glScalef(sx, sy, 1.);
+    glTranslatef(0., RadiusOfBall, 0.);
 
-    // Scale the ball about its bottom
-    S[0] = sx;
-    S[5] = sy;
-    glMultMatrixf(S);
-
-    // Translate ball up so bottom is at the origin
-    T1[13] = RadiusOfBall;
-    glMultMatrixf(T1);
-
-    // Draw the ball
     draw_ball();
+    glPopMatrix();
 
-    // Post redisplay to keep animating
+    draw_paddle(20., paddleY); // Blanco
+
+    draw_paddle(140., paddleY); // Blanco
+
     glutPostRedisplay();
 }
 
 
 void reshape (int w, int h)
 {
-   // on reshape and on startup, keep the viewport to be the entire size of the window
    glViewport (0, 0, (GLsizei) w, (GLsizei) h);
    glMatrixMode (GL_PROJECTION);
    glLoadIdentity ();
 
-   // keep our logical coordinate system constant
    gluOrtho2D(0.0, 160.0, 0.0, 120.0);
    glMatrixMode(GL_MODELVIEW);
    glLoadIdentity ();
@@ -109,19 +114,15 @@ void reshape (int w, int h)
 
 
 void init(void){
-  //set the clear color to be white
   glClearColor(0.0,0.8,0.0,1.0);
-  // initial position set to 0,0
   xpos = 80.; ypos = RadiusOfBall; xdir = 1; ydir = 1;
   sx = 1.; sy = 1.; squash = 0.9;
   rot = 0; 
-
 }
 
 
 int main(int argc, char* argv[])
 {
-
   glutInit( & argc, argv );
   glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
   glutInitWindowSize (320, 240);   
