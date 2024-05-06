@@ -1,6 +1,7 @@
 //Punto extra: Ping Pong
 #include <GLUT/glut.h>
 #include <math.h>
+#include <stdio.h>
 
 const double paddleWidth = 5.0;
 const double paddleHeight = 30.0;
@@ -45,40 +46,56 @@ void draw_paddle(double x, double y) {
 double paddleYLeft = 60.0;
 double paddleYRight = 60.0;
 
+int scoreLeft = 0;
+int scoreRight = 0;
+
+bool isPaused = true;
+
 void Display(void) {
     glutSwapBuffers();
     glClear(GL_COLOR_BUFFER_BIT);
 
-    xpos += xdir * 1.009;
-    ypos += ydir * 1.009;
+    if (!isPaused) {
+        xpos += xdir * 1.009;
+        ypos += ydir * 1.009;
 
-    if ((xpos - RadiusOfBall <= 25.0 && xpos - RadiusOfBall >= 20.0 && fabs(ypos - paddleYLeft) <= paddleHeight / 2) ||
-        (xpos + RadiusOfBall >= 135.0 && xpos + RadiusOfBall <= 140.0 && fabs(ypos - paddleYRight) <= paddleHeight / 2)) {
-        xdir = -xdir; 
-    }
+        if ((xpos - RadiusOfBall <= 25.0 && xpos - RadiusOfBall >= 20.0 && fabs(ypos - paddleYLeft) <= paddleHeight / 2) ||
+            (xpos + RadiusOfBall >= 135.0 && xpos + RadiusOfBall <= 140.0 && fabs(ypos - paddleYRight) <= paddleHeight / 2)) {
+            xdir = -xdir; 
+        }
 
-    if (ypos >= 120.0 - RadiusOfBall || ypos <= RadiusOfBall)
-    {
-        ydir = -ydir;
-    }
+        if (ypos >= 120.0 - RadiusOfBall || ypos <= RadiusOfBall)
+        {
+            ydir = -ydir;
+        }
 
-    if (xpos >= 160.0 - RadiusOfBall || xpos <= RadiusOfBall)
-    {
-        xpos = 80.;
-        ypos = 60.;
-        xdir = -xdir;
-    }
+        if (xpos >= 160.0 - RadiusOfBall) {
+            xpos = 80.;
+            ypos = 60.;
+            xdir = -xdir;
+            isPaused = true; 
+            scoreLeft++;
+        }
 
-    if (paddleYLeft + paddleHeight / 2 > 120.0) {
-        paddleYLeft = 120.0 - paddleHeight / 2;
-    } else if (paddleYLeft - paddleHeight / 2 < 0.0) {
-        paddleYLeft = paddleHeight / 2;
-    }
+        if (xpos <= RadiusOfBall) {
+            xpos = 80.;
+            ypos = 60.;
+            xdir = -xdir;
+            isPaused = true;
+            scoreRight++;
+        }
 
-    if (paddleYRight + paddleHeight / 2 > 120.0) {
-        paddleYRight = 120.0 - paddleHeight / 2;
-    } else if (paddleYRight - paddleHeight / 2 < 0.0) {
-        paddleYRight = paddleHeight / 2;
+        if (paddleYLeft + paddleHeight / 2 > 120.0) {
+            paddleYLeft = 120.0 - paddleHeight / 2;
+        } else if (paddleYLeft - paddleHeight / 2 < 0.0) {
+            paddleYLeft = paddleHeight / 2;
+        }
+
+        if (paddleYRight + paddleHeight / 2 > 120.0) {
+            paddleYRight = 120.0 - paddleHeight / 2;
+        } else if (paddleYRight - paddleHeight / 2 < 0.0) {
+            paddleYRight = paddleHeight / 2;
+        }
     }
 
     glLoadIdentity();
@@ -93,6 +110,15 @@ void Display(void) {
     draw_paddle(20., paddleYLeft); 
     draw_paddle(140., paddleYRight);
 
+    // Mostrar marcador
+    glColor3f(1.0, 1.0, 1.0);
+    glRasterPos2i(70, 110);
+    char scoreText[50];
+    sprintf(scoreText, "Left: %d   Right: %d", scoreLeft, scoreRight);
+    for (char *c = scoreText; *c != '\0'; c++) {
+        glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, *c);
+    }
+
     glutPostRedisplay();
 }
 
@@ -106,25 +132,33 @@ void reshape (int w, int h) {
 }
 
 void SpecialKeys(int key, int x, int y) {
-    switch (key) {
-        case GLUT_KEY_UP:
-            paddleYRight += paddle_speed;
-            break;
-        case GLUT_KEY_DOWN:
-            paddleYRight -= paddle_speed;
-            break;
+    if (key == ' ') {
+        isPaused = !isPaused;
+    } else if (!isPaused) { 
+        switch (key) {
+            case GLUT_KEY_UP:
+                paddleYRight += paddle_speed;
+                break;
+            case GLUT_KEY_DOWN:
+                paddleYRight -= paddle_speed;
+                break;
+        }
     }
     glutPostRedisplay();
 }
 
 void handleKeypress(unsigned char key, int x, int y) {
-    switch (key) {
-        case 'w':
-            paddleYLeft += paddle_speed;
-            break;
-        case 's':
-            paddleYLeft -= paddle_speed;
-            break;
+    if (key == ' ') {
+        isPaused = !isPaused; 
+    } else if (!isPaused) {
+        switch (key) {
+            case 'w':
+                paddleYLeft += paddle_speed;
+                break;
+            case 's':
+                paddleYLeft -= paddle_speed;
+                break;
+        }
     }
     glutPostRedisplay();
 }
